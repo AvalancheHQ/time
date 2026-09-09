@@ -1,7 +1,10 @@
 //! Benchmarks for `time`.
 //!
-//! These benchmarks are not very precise, but they're good enough to catch major performance
-//! regressions. Run them if you think that may be the case. CI **does not** run benchmarks.
+//! These benchmarks are not very precise when run locally, but they're good enough to catch major
+//! performance regressions. Run them if you think that may be the case.
+//!
+//! CI runs these benchmarks on every push and pull request through CodSpeed, which measures them
+//! with CPU simulation instead of wall time.
 
 #![allow(
     clippy::std_instead_of_core,
@@ -13,6 +16,8 @@
     clippy::missing_docs_in_private_items,
     reason = "may be removed in the future"
 )]
+
+use std::hint::black_box;
 
 #[cfg(not(all(
     feature = "default",
@@ -30,9 +35,7 @@
     feature = "serde",
     bench,
 )))]
-compile_error!(
-    "benchmarks must be run as `RUSTFLAGS=\"--cfg bench\" cargo criterion --all-features`"
-);
+compile_error!("benchmarks must be run as `RUSTFLAGS=\"--cfg bench\" cargo bench --all-features`");
 
 macro_rules! setup_benchmark {
     (
@@ -74,14 +77,52 @@ macro_rules! setup_benchmark {
     };
 }
 
+/// How many times the routines of a nano-benchmark are run within a single measurement.
+///
+/// CodSpeed measures a single iteration of each benchmark, so a routine that compiles down to a
+/// handful of instructions is smaller than the fixed cost of taking a measurement (and may not be
+/// resolvable at all). Running the routine repeatedly amortizes that cost.
+const ROUNDS: usize = 64;
+
+/// Benchmark a group of routines as a single measurement.
+///
+/// Calling `Bencher::iter` more than once in the same benchmark reports several values under the
+/// same name, of which only the last is kept. Grouping the routines instead measures all of them.
+macro_rules! iter_all {
+    ($ben:ident, [$($routine:expr),+ $(,)?]) => {
+        $ben.iter(|| {
+            $(crate::run_opaque($routine);)+
+        })
+    };
+}
+
+/// Benchmark a group of routines as a single measurement, running each of them [`ROUNDS`] times.
+///
+/// This is used for the benchmarks that are too small to be measured on their own.
+macro_rules! iter_all_repeated {
+    ($ben:ident, [$($routine:expr),+ $(,)?]) => {
+        $ben.iter(|| {
+            for _ in 0..crate::ROUNDS {
+                $(crate::run_opaque($routine);)+
+            }
+        })
+    };
+}
+
+/// Benchmark a group of routines mutating a freshly initialized value as a single measurement.
+///
+/// As with [`iter_all`], the routines are grouped so that they are all measured under the
+/// benchmark's name. They are applied to the same value, one after the other.
 macro_rules! iter_batched_ref {
-    ($ben:ident, $initializer:expr,[$($routine:expr),+ $(,)?]) => {$(
+    ($ben:ident, $initializer:expr,[$($routine:expr),+ $(,)?]) => {
         $ben.iter_batched_ref(
             $initializer,
-            $routine,
+            |value| {
+                $(crate::run_opaque_ref(value, $routine);)+
+            },
             ::criterion::BatchSize::SmallInput,
         );
-    )+};
+    };
 }
 
 macro_rules! mods {
@@ -104,10 +145,29 @@ mods![
     mod rand08;
     mod rand09;
     mod time;
+    mod utc_date_time;
     mod utc_offset;
     mod util;
     mod weekday;
 ];
+
+/// Run a routine once, discarding its result.
+///
+/// The routine is called through an opaque pointer, which keeps the compiler from hoisting the
+/// call out of the surrounding loop or from replacing it with a constant.
+fn run_opaque<O>(mut routine: impl FnMut() -> O) {
+    let routine = black_box(&mut routine);
+    drop(black_box(routine()));
+}
+
+/// Run a routine once on a mutable value, discarding its result.
+///
+/// This is the equivalent of [`run_opaque`] for the routines of [`iter_batched_ref`].
+fn run_opaque_ref<I, O>(value: &mut I, mut routine: impl FnMut(&mut I) -> O) {
+    let routine = black_box(&mut routine);
+    let value = black_box(value);
+    drop(black_box(routine(value)));
+}
 
 /// Shuffle a slice in a random but deterministic manner.
 fn shuffle<T, const N: usize>(mut slice: [T; N]) -> [T; N] {

@@ -1,3 +1,5 @@
+use std::hint::black_box;
+
 use criterion::Bencher;
 use time::Weekday::*;
 
@@ -5,77 +7,91 @@ setup_benchmark! {
     "Weekday",
 
     fn previous(ben: &mut Bencher<'_>) {
-        ben.iter(|| Sunday.previous());
-        ben.iter(|| Monday.previous());
-        ben.iter(|| Tuesday.previous());
-        ben.iter(|| Wednesday.previous());
-        ben.iter(|| Thursday.previous());
-        ben.iter(|| Friday.previous());
-        ben.iter(|| Saturday.previous());
+        iter_all_repeated!(ben, [
+            || black_box(Sunday).previous(),
+            || black_box(Monday).previous(),
+            || black_box(Tuesday).previous(),
+            || black_box(Wednesday).previous(),
+            || black_box(Thursday).previous(),
+            || black_box(Friday).previous(),
+            || black_box(Saturday).previous(),
+        ]);
     }
 
     fn next(ben: &mut Bencher<'_>) {
-        ben.iter(|| Sunday.next());
-        ben.iter(|| Monday.next());
-        ben.iter(|| Tuesday.next());
-        ben.iter(|| Wednesday.next());
-        ben.iter(|| Thursday.next());
-        ben.iter(|| Friday.next());
-        ben.iter(|| Saturday.next());
+        iter_all_repeated!(ben, [
+            || black_box(Sunday).next(),
+            || black_box(Monday).next(),
+            || black_box(Tuesday).next(),
+            || black_box(Wednesday).next(),
+            || black_box(Thursday).next(),
+            || black_box(Friday).next(),
+            || black_box(Saturday).next(),
+        ]);
     }
 
     fn nth(ben: &mut Bencher<'_>) {
-        ben.iter(|| Sunday.nth_next(0));
-        ben.iter(|| Sunday.nth_next(1));
-        ben.iter(|| Sunday.nth_next(2));
-        ben.iter(|| Sunday.nth_next(3));
-        ben.iter(|| Sunday.nth_next(4));
-        ben.iter(|| Sunday.nth_next(5));
-        ben.iter(|| Sunday.nth_next(6));
+        iter_all_repeated!(ben, [
+            || black_box(Sunday).nth_next(black_box(0)),
+            || black_box(Sunday).nth_next(black_box(1)),
+            || black_box(Sunday).nth_next(black_box(2)),
+            || black_box(Sunday).nth_next(black_box(3)),
+            || black_box(Sunday).nth_next(black_box(4)),
+            || black_box(Sunday).nth_next(black_box(5)),
+            || black_box(Sunday).nth_next(black_box(6)),
 
-        ben.iter(|| Sunday.nth_next(7));
-        ben.iter(|| Sunday.nth_next(u8::MAX));
-        ben.iter(|| Monday.nth_next(7));
-        ben.iter(|| Monday.nth_next(u8::MAX));
+            || black_box(Sunday).nth_next(black_box(7)),
+            || black_box(Sunday).nth_next(black_box(u8::MAX)),
+            || black_box(Monday).nth_next(black_box(7)),
+            || black_box(Monday).nth_next(black_box(u8::MAX)),
+        ]);
     }
 
     fn number_from_monday(ben: &mut Bencher<'_>) {
-        ben.iter(|| Monday.number_from_monday());
-        ben.iter(|| Tuesday.number_from_monday());
-        ben.iter(|| Wednesday.number_from_monday());
-        ben.iter(|| Thursday.number_from_monday());
-        ben.iter(|| Friday.number_from_monday());
-        ben.iter(|| Saturday.number_from_monday());
-        ben.iter(|| Sunday.number_from_monday());
+        iter_all_repeated!(ben, [
+            || black_box(Monday).number_from_monday(),
+            || black_box(Tuesday).number_from_monday(),
+            || black_box(Wednesday).number_from_monday(),
+            || black_box(Thursday).number_from_monday(),
+            || black_box(Friday).number_from_monday(),
+            || black_box(Saturday).number_from_monday(),
+            || black_box(Sunday).number_from_monday(),
+        ]);
     }
 
     fn number_from_sunday(ben: &mut Bencher<'_>) {
-        ben.iter(|| Sunday.number_from_sunday());
-        ben.iter(|| Monday.number_from_sunday());
-        ben.iter(|| Tuesday.number_from_sunday());
-        ben.iter(|| Wednesday.number_from_sunday());
-        ben.iter(|| Thursday.number_from_sunday());
-        ben.iter(|| Friday.number_from_sunday());
-        ben.iter(|| Saturday.number_from_sunday());
+        iter_all_repeated!(ben, [
+            || black_box(Sunday).number_from_sunday(),
+            || black_box(Monday).number_from_sunday(),
+            || black_box(Tuesday).number_from_sunday(),
+            || black_box(Wednesday).number_from_sunday(),
+            || black_box(Thursday).number_from_sunday(),
+            || black_box(Friday).number_from_sunday(),
+            || black_box(Saturday).number_from_sunday(),
+        ]);
     }
 
     fn number_days_from_monday(ben: &mut Bencher<'_>) {
-        ben.iter(|| Monday.number_days_from_monday());
-        ben.iter(|| Tuesday.number_days_from_monday());
-        ben.iter(|| Wednesday.number_days_from_monday());
-        ben.iter(|| Thursday.number_days_from_monday());
-        ben.iter(|| Friday.number_days_from_monday());
-        ben.iter(|| Saturday.number_days_from_monday());
-        ben.iter(|| Sunday.number_days_from_monday());
+        iter_all_repeated!(ben, [
+            || black_box(Monday).number_days_from_monday(),
+            || black_box(Tuesday).number_days_from_monday(),
+            || black_box(Wednesday).number_days_from_monday(),
+            || black_box(Thursday).number_days_from_monday(),
+            || black_box(Friday).number_days_from_monday(),
+            || black_box(Saturday).number_days_from_monday(),
+            || black_box(Sunday).number_days_from_monday(),
+        ]);
     }
 
     fn number_days_from_sunday(ben: &mut Bencher<'_>) {
-        ben.iter(|| Sunday.number_days_from_sunday());
-        ben.iter(|| Monday.number_days_from_sunday());
-        ben.iter(|| Tuesday.number_days_from_sunday());
-        ben.iter(|| Wednesday.number_days_from_sunday());
-        ben.iter(|| Thursday.number_days_from_sunday());
-        ben.iter(|| Friday.number_days_from_sunday());
-        ben.iter(|| Saturday.number_days_from_sunday());
+        iter_all_repeated!(ben, [
+            || black_box(Sunday).number_days_from_sunday(),
+            || black_box(Monday).number_days_from_sunday(),
+            || black_box(Tuesday).number_days_from_sunday(),
+            || black_box(Wednesday).number_days_from_sunday(),
+            || black_box(Thursday).number_days_from_sunday(),
+            || black_box(Friday).number_days_from_sunday(),
+            || black_box(Saturday).number_days_from_sunday(),
+        ]);
     }
 }

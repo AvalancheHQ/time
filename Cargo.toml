@@ -16,7 +16,7 @@ license = "MIT OR Apache-2.0"
 time-core = { path = "time-core", version = "=0.1.9" }
 time-macros = { path = "time-macros", version = "=0.2.32" }
 
-criterion = { version = "0.8.1", default-features = false }
+criterion = { package = "codspeed-criterion-compat", version = "5.0.1", default-features = false }
 deranged = "0.5.8"
 js-sys = "0.3.58"
 libc = "0.2.98"

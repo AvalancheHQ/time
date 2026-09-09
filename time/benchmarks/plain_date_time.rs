@@ -1,3 +1,5 @@
+use std::hint::black_box;
+
 use criterion::Bencher;
 use time::ext::{NumericalDuration, NumericalStdDuration};
 use time::macros::{datetime, offset};
@@ -9,12 +11,18 @@ setup_benchmark! {
     // a second time.
 
     fn assume_offset(ben: &mut Bencher<'_>) {
-        ben.iter(|| datetime!(2019-01-01 0:00).assume_offset(offset!(UTC)));
-        ben.iter(|| datetime!(2019-01-01 0:00).assume_offset(offset!(-1)));
+        let datetime = black_box(datetime!(2019-01-01 0:00));
+        iter_all_repeated!(ben, [
+            || datetime.assume_offset(black_box(offset!(UTC))),
+            || datetime.assume_offset(black_box(offset!(-1))),
+        ]);
     }
 
     fn assume_utc(ben: &mut Bencher<'_>) {
-        ben.iter(|| datetime!(2019-01-01 0:00).assume_utc());
+        let datetime = black_box(datetime!(2019-01-01 0:00));
+        iter_all_repeated!(ben, [
+            || datetime.assume_utc(),
+        ]);
     }
 
     fn add_duration(ben: &mut Bencher<'_>) {
@@ -24,11 +32,13 @@ setup_benchmark! {
         let d = (-2).seconds();
         let e = 1.hours();
 
-        ben.iter(|| datetime!(2019-01-01 0:00) + a);
-        ben.iter(|| datetime!(2019-12-31 0:00) + b);
-        ben.iter(|| datetime!(2019-12-31 23:59:59) + c);
-        ben.iter(|| datetime!(2020-01-01 0:00:01) + d);
-        ben.iter(|| datetime!(1999-12-31 23:00) + e);
+        iter_all!(ben, [
+            || datetime!(2019-01-01 0:00) + a,
+            || datetime!(2019-12-31 0:00) + b,
+            || datetime!(2019-12-31 23:59:59) + c,
+            || datetime!(2020-01-01 0:00:01) + d,
+            || datetime!(1999-12-31 23:00) + e,
+        ]);
     }
 
     fn add_std_duration(ben: &mut Bencher<'_>) {
@@ -36,9 +46,11 @@ setup_benchmark! {
         let b = 1.std_days();
         let c = 2.std_seconds();
 
-        ben.iter(|| datetime!(2019-01-01 0:00) + a);
-        ben.iter(|| datetime!(2019-12-31 0:00) + b);
-        ben.iter(|| datetime!(2019-12-31 23:59:59) + c);
+        iter_all!(ben, [
+            || datetime!(2019-01-01 0:00) + a,
+            || datetime!(2019-12-31 0:00) + b,
+            || datetime!(2019-12-31 23:59:59) + c,
+        ]);
     }
 
     fn add_assign_duration(ben: &mut Bencher<'_>) {
@@ -74,11 +86,13 @@ setup_benchmark! {
         let d = (-2).seconds();
         let e = (-1).hours();
 
-        ben.iter(|| datetime!(2019-01-06 0:00) - a);
-        ben.iter(|| datetime!(2020-01-01 0:00) - b);
-        ben.iter(|| datetime!(2020-01-01 0:00:01) - c);
-        ben.iter(|| datetime!(2019-12-31 23:59:59) - d);
-        ben.iter(|| datetime!(1999-12-31 23:00) - e);
+        iter_all!(ben, [
+            || datetime!(2019-01-06 0:00) - a,
+            || datetime!(2020-01-01 0:00) - b,
+            || datetime!(2020-01-01 0:00:01) - c,
+            || datetime!(2019-12-31 23:59:59) - d,
+            || datetime!(1999-12-31 23:00) - e,
+        ]);
     }
 
     fn sub_std_duration(ben: &mut Bencher<'_>) {
@@ -86,9 +100,11 @@ setup_benchmark! {
         let b = 1.std_days();
         let c = 2.std_seconds();
 
-        ben.iter(|| datetime!(2019-01-06 0:00) - a);
-        ben.iter(|| datetime!(2020-01-01 0:00) - b);
-        ben.iter(|| datetime!(2020-01-01 0:00:01) - c);
+        iter_all!(ben, [
+            || datetime!(2019-01-06 0:00) - a,
+            || datetime!(2020-01-01 0:00) - b,
+            || datetime!(2020-01-01 0:00:01) - c,
+        ]);
     }
 
     fn sub_assign_duration(ben: &mut Bencher<'_>) {
@@ -118,31 +134,45 @@ setup_benchmark! {
     }
 
     fn sub_datetime(ben: &mut Bencher<'_>) {
-        ben.iter(|| datetime!(2019-01-02 0:00) - datetime!(2019-01-01 0:00));
-        ben.iter(|| datetime!(2019-01-01 0:00) - datetime!(2019-01-02 0:00));
-        ben.iter(|| datetime!(2020-01-01 0:00) - datetime!(2019-12-31 0:00));
-        ben.iter(|| datetime!(2019-12-31 0:00) - datetime!(2020-01-01 0:00));
+        let jan_1 = black_box(datetime!(2019-01-01 0:00));
+        let jan_2 = black_box(datetime!(2019-01-02 0:00));
+        let dec_31 = black_box(datetime!(2019-12-31 0:00));
+        let next_jan_1 = black_box(datetime!(2020-01-01 0:00));
+
+        iter_all_repeated!(ben, [
+            || jan_2 - jan_1,
+            || jan_1 - jan_2,
+            || next_jan_1 - dec_31,
+            || dec_31 - next_jan_1,
+        ]);
     }
 
     fn ord(ben: &mut Bencher<'_>) {
-        ben.iter(|| datetime!(2019-01-01 0:00).partial_cmp(&datetime!(2019-01-01 0:00)));
-        ben.iter(|| datetime!(2019-01-01 0:00).partial_cmp(&datetime!(2020-01-01 0:00)));
-        ben.iter(|| datetime!(2019-01-01 0:00).partial_cmp(&datetime!(2019-02-01 0:00)));
-        ben.iter(|| datetime!(2019-01-01 0:00).partial_cmp(&datetime!(2019-01-02 0:00)));
-        ben.iter(|| datetime!(2019-01-01 0:00).partial_cmp(&datetime!(2019-01-01 1:00)));
-        ben.iter(|| datetime!(2019-01-01 0:00).partial_cmp(&datetime!(2019-01-01 0:01)));
-        ben.iter(|| datetime!(2019-01-01 0:00).partial_cmp(&datetime!(2019-01-01 0:00:01)));
-        ben.iter(||
-            datetime!(2019-01-01 0:00).partial_cmp(&datetime!(2019-01-01 0:00:00.000_000_001))
-        );
-        ben.iter(|| datetime!(2020-01-01 0:00).partial_cmp(&datetime!(2019-01-01 0:00)));
-        ben.iter(|| datetime!(2019-02-01 0:00).partial_cmp(&datetime!(2019-01-01 0:00)));
-        ben.iter(|| datetime!(2019-01-02 0:00).partial_cmp(&datetime!(2019-01-01 0:00)));
-        ben.iter(|| datetime!(2019-01-01 1:00).partial_cmp(&datetime!(2019-01-01 0:00)));
-        ben.iter(|| datetime!(2019-01-01 0:01).partial_cmp(&datetime!(2019-01-01 0:00)));
-        ben.iter(|| datetime!(2019-01-01 0:00:01).partial_cmp(&datetime!(2019-01-01 0:00)));
-        ben.iter(||
-            datetime!(2019-01-01 0:00:00.000_000_001).partial_cmp(&datetime!(2019-01-01 0:00))
-        );
+        let base = black_box(datetime!(2019-01-01 0:00));
+        let year = black_box(datetime!(2020-01-01 0:00));
+        let month = black_box(datetime!(2019-02-01 0:00));
+        let day = black_box(datetime!(2019-01-02 0:00));
+        let hour = black_box(datetime!(2019-01-01 1:00));
+        let minute = black_box(datetime!(2019-01-01 0:01));
+        let second = black_box(datetime!(2019-01-01 0:00:01));
+        let nanosecond = black_box(datetime!(2019-01-01 0:00:00.000_000_001));
+
+        iter_all_repeated!(ben, [
+            || base.partial_cmp(&base),
+            || base.partial_cmp(&year),
+            || base.partial_cmp(&month),
+            || base.partial_cmp(&day),
+            || base.partial_cmp(&hour),
+            || base.partial_cmp(&minute),
+            || base.partial_cmp(&second),
+            || base.partial_cmp(&nanosecond),
+            || year.partial_cmp(&base),
+            || month.partial_cmp(&base),
+            || day.partial_cmp(&base),
+            || hour.partial_cmp(&base),
+            || minute.partial_cmp(&base),
+            || second.partial_cmp(&base),
+            || nanosecond.partial_cmp(&base),
+        ]);
     }
 }

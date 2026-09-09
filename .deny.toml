@@ -1,2 +1,6 @@
 [licenses]
 allow = ["MIT", "Apache-2.0", "Unicode-3.0"]
+exceptions = [
+    # Pulled in by the benchmark harness only, and not part of any published artifact.
+    { crate = "colored", allow = ["MPL-2.0"] },
+]
