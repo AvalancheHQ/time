@@ -1,3 +1,5 @@
+use std::hint::black_box;
+
 use criterion::Bencher;
 use time::Month::*;
 
@@ -5,62 +7,68 @@ setup_benchmark! {
     "Month",
 
     fn previous(ben: &mut Bencher<'_>) {
-        ben.iter(|| January.previous());
-        ben.iter(|| February.previous());
-        ben.iter(|| March.previous());
-        ben.iter(|| April.previous());
-        ben.iter(|| May.previous());
-        ben.iter(|| June.previous());
-        ben.iter(|| July.previous());
-        ben.iter(|| August.previous());
-        ben.iter(|| September.previous());
-        ben.iter(|| October.previous());
-        ben.iter(|| November.previous());
-        ben.iter(|| December.previous());
+        iter_all_repeated!(ben, [
+            || black_box(January).previous(),
+            || black_box(February).previous(),
+            || black_box(March).previous(),
+            || black_box(April).previous(),
+            || black_box(May).previous(),
+            || black_box(June).previous(),
+            || black_box(July).previous(),
+            || black_box(August).previous(),
+            || black_box(September).previous(),
+            || black_box(October).previous(),
+            || black_box(November).previous(),
+            || black_box(December).previous(),
+        ]);
     }
 
     fn next(ben: &mut Bencher<'_>) {
-        ben.iter(|| January.next());
-        ben.iter(|| February.next());
-        ben.iter(|| March.next());
-        ben.iter(|| April.next());
-        ben.iter(|| May.next());
-        ben.iter(|| June.next());
-        ben.iter(|| July.next());
-        ben.iter(|| August.next());
-        ben.iter(|| September.next());
-        ben.iter(|| October.next());
-        ben.iter(|| November.next());
-        ben.iter(|| December.next());
+        iter_all_repeated!(ben, [
+            || black_box(January).next(),
+            || black_box(February).next(),
+            || black_box(March).next(),
+            || black_box(April).next(),
+            || black_box(May).next(),
+            || black_box(June).next(),
+            || black_box(July).next(),
+            || black_box(August).next(),
+            || black_box(September).next(),
+            || black_box(October).next(),
+            || black_box(November).next(),
+            || black_box(December).next(),
+        ]);
     }
 
     fn length(ben: &mut Bencher<'_>) {
         // Common year
-        ben.iter(|| January.length(2019));
-        ben.iter(|| February.length(2019));
-        ben.iter(|| March.length(2019));
-        ben.iter(|| April.length(2019));
-        ben.iter(|| May.length(2019));
-        ben.iter(|| June.length(2019));
-        ben.iter(|| July.length(2019));
-        ben.iter(|| August.length(2019));
-        ben.iter(|| September.length(2019));
-        ben.iter(|| October.length(2019));
-        ben.iter(|| November.length(2019));
-        ben.iter(|| December.length(2019));
+        iter_all_repeated!(ben, [
+            || black_box(January).length(black_box(2019)),
+            || black_box(February).length(black_box(2019)),
+            || black_box(March).length(black_box(2019)),
+            || black_box(April).length(black_box(2019)),
+            || black_box(May).length(black_box(2019)),
+            || black_box(June).length(black_box(2019)),
+            || black_box(July).length(black_box(2019)),
+            || black_box(August).length(black_box(2019)),
+            || black_box(September).length(black_box(2019)),
+            || black_box(October).length(black_box(2019)),
+            || black_box(November).length(black_box(2019)),
+            || black_box(December).length(black_box(2019)),
 
-        // Leap year
-        ben.iter(|| January.length(2020));
-        ben.iter(|| February.length(2020));
-        ben.iter(|| March.length(2020));
-        ben.iter(|| April.length(2020));
-        ben.iter(|| May.length(2020));
-        ben.iter(|| June.length(2020));
-        ben.iter(|| July.length(2020));
-        ben.iter(|| August.length(2020));
-        ben.iter(|| September.length(2020));
-        ben.iter(|| October.length(2020));
-        ben.iter(|| November.length(2020));
-        ben.iter(|| December.length(2020));
+            // Leap year
+            || black_box(January).length(black_box(2020)),
+            || black_box(February).length(black_box(2020)),
+            || black_box(March).length(black_box(2020)),
+            || black_box(April).length(black_box(2020)),
+            || black_box(May).length(black_box(2020)),
+            || black_box(June).length(black_box(2020)),
+            || black_box(July).length(black_box(2020)),
+            || black_box(August).length(black_box(2020)),
+            || black_box(September).length(black_box(2020)),
+            || black_box(October).length(black_box(2020)),
+            || black_box(November).length(black_box(2020)),
+            || black_box(December).length(black_box(2020)),
+        ]);
     }
 }

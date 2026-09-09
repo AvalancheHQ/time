@@ -4,6 +4,7 @@
 [![version](https://img.shields.io/crates/v/time?color=blue&logo=rust&style=flat-square)](https://crates.io/crates/time)
 [![build status](https://img.shields.io/github/actions/workflow/status/time-rs/time/build.yaml?branch=main&style=flat-square)](https://github.com/time-rs/time/actions)
 [![codecov](https://codecov.io/gh/time-rs/time/branch/main/graph/badge.svg?token=yt4XSmQNKQ)](https://codecov.io/gh/time-rs/time)
+[![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://app.codspeed.io/AvalancheHQ/time?utm_source=badge)
 
 Documentation:
 

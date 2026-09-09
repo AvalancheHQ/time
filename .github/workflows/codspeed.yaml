@@ -1,0 +1,66 @@
+name: CodSpeed
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main]
+    tags-ignore: ["**"]
+    paths-ignore:
+      - "**.md"
+      - LICENSE-Apache
+      - LICENSE-MIT
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - "**/LICENSE-Apache"
+      - "**/LICENSE-MIT"
+      - .github/FUNDING.yml
+      - .editorconfig
+      - .gitignore
+      - logo.svg
+  # Allows CodSpeed to trigger a run to generate initial data.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # Required for OpenID Connect authentication with CodSpeed.
+  id-token: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  benchmark:
+    name: Run benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v7
+
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo output
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: codspeed-cache
+
+      - name: Install cargo-codspeed
+        run: cargo install cargo-codspeed --locked
+
+      - name: Build the benchmarks
+        run: cargo codspeed build -p time --all-features
+        env:
+          RUSTFLAGS: --cfg bench
+
+      - name: Run the benchmarks
+        uses: CodSpeedHQ/action@v5
+        with:
+          mode: simulation
+          run: cargo codspeed run
+        env:
+          RUSTFLAGS: --cfg bench
