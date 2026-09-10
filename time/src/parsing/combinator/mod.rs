@@ -171,17 +171,31 @@ impl ExactlyNDigits<3> {
 impl ExactlyNDigits<4> {
     /// Consume exactly four digits.
     #[inline]
-    pub(crate) fn parse(input: &[u8]) -> Option<ParsedItem<'_, u16>> {
+    pub(crate) const fn parse(input: &[u8]) -> Option<ParsedItem<'_, u16>> {
         let [a, b, c, d, remaining @ ..] = input else {
             return None;
         };
 
-        let digits = [a, b, c, d].map(|d| (*d as u16).wrapping_sub(b'0' as u16));
-        if digits.iter().any(|&digit| digit > 9) {
+        // Loading the four bytes as a single integer allows them to be validated and combined
+        // with a handful of register-only operations, avoiding the per-digit array that the
+        // compiler is unable to keep out of memory.
+        let chunk = u32::from_le_bytes([*a, *b, *c, *d]);
+
+        // A byte is an ASCII digit if and only if its high nibble is three both as-is and after
+        // adding six, the latter rejecting `b':'` through `b'?'`. A byte that is not a digit
+        // always fails this check itself, so the carry it may produce is irrelevant.
+        if (chunk & 0xF0F0_F0F0) | ((chunk.wrapping_add(0x0606_0606) & 0xF0F0_F0F0) >> 4)
+            != 0x3333_3333
+        {
             return None;
         }
 
-        let value = digits[0] * 1000 + digits[1] * 100 + digits[2] * 10 + digits[3];
+        // Combine the digits two at a time, as the intermediate values are small enough to keep
+        // one per byte.
+        let chunk = chunk & 0x0F0F_0F0F;
+        let pairs = (chunk & 0x000F_000F) * 10 + ((chunk & 0x0F00_0F00) >> 8);
+        let value = ((pairs & 0x0000_00FF) * 100 + ((pairs & 0x00FF_0000) >> 16)) as u16;
+
         Some(ParsedItem(remaining, value))
     }
 }
